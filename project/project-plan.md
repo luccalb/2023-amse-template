@@ -3,12 +3,14 @@
 ## Summary
 
 <!-- Describe your data science project in max. 5 sentences. -->
-This projects analyzes if there is a correlation between the gross domestic product (GDP) per person and the CO2 mass emitted by newly registered cars in Germany.
+This projects analyzes if there is a correlation between the gross domestic product (GDP) per person and the ~~CO2 mass emitted by~~ share of electric vehicles of newly registered cars in Germany.
 
 ## Rationale
 
 <!-- Outline the impact of the analysis, e.g. which pains it solves. -->
-The analysis helps interested citizens and researchers to test the claim that per capita CO2 emissions rise with income. It is limited to the domain of privately owned vehicles and their emissions.
+The analysis helps interested citizens and researchers to test ~~the claim that per capita CO2 emissions rise with income~~ if the relatively high cost of electric vehicles favors a more rapid transition towards EVs in wealthier german states. It is limited to the domain of privately owned vehicles ~~and their emissions~~.
+
+## 
 
 ## Datasources
 
