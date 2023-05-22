@@ -81,7 +81,12 @@ print(gdp_df.head())
 
 # 3.2 Load and save vehicle data
 
-vr_df = pd.read_excel(vr_download_location, sheet_name='FZ 8.6', usecols='B:Q', skiprows=7, nrows=17, index_col=0)
+vr_df = pd.read_excel(vr_download_location,
+                      sheet_name='FZ 8.6',
+                      usecols='B:Q',
+                      skiprows=7,
+                      nrows=17,
+                      index_col=0)
 # remove the newline characters in state names
 vr_df.columns = vr_df.columns.str.replace('\n', ' ')
 vr_df = vr_df[['Elektro (BEV)', 'Hybrid', 'Insgesamt']]
