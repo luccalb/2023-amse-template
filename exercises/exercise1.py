@@ -10,14 +10,10 @@ DATA_URL = "https://opendata.rhein-kreis-neuss.de/api/v2/catalog/datasets/rhein-
 CSV_PATH = "./data/airports.csv"
 SQL_PATH = "/data/airports.sqlite"
 
-def save_url(url, out):
-    '''Takes a url and saves the contents to out'''
-    file_stream = requests.get(url, timeout=HTTP_TIMEOUT, allow_redirects=True)
-    open(out, 'wb').write(file_stream.content)
-    
-save_url(DATA_URL, CSV_PATH)
 
-df = pd.read_csv(CSV_PATH, delimiter=';', index_col='column_1')
+    
+
+df = pd.read_csv(DATA_URL, delimiter=';', index_col='column_1')
 print(df.head())
 print(df.info())
 
