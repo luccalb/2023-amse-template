@@ -1,17 +1,11 @@
-import os
 import pandas as pd
-import requests
 from sqlalchemy.types import Integer, Text, String, DateTime, Float
 from sqlalchemy import create_engine
 
 HTTP_TIMEOUT = 10000
 
 DATA_URL = "https://opendata.rhein-kreis-neuss.de/api/v2/catalog/datasets/rhein-kreis-neuss-flughafen-weltweit/exports/csv"
-CSV_PATH = "./data/airports.csv"
-SQL_PATH = "/data/airports.sqlite"
-
-
-    
+SQL_PATH = "/airports.sqlite"
 
 df = pd.read_csv(DATA_URL, delimiter=';', index_col='column_1')
 print(df.head())
