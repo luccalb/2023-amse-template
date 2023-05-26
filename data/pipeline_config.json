@@ -4,7 +4,7 @@
         "gdp_per_capita": "https://www.statistikportal.de/sites/default/files/2023-03/vgrdl_r1b1_bs2022_1.xlsx"
     },
     "download_locations": {
-        "vehicle_registrations": "./raw/vr.xlsx",
-        "gdp_per_capita": "./raw/gdp.xlsx"
+        "vehicle_registrations": "raw/vr.xlsx",
+        "gdp_per_capita": "raw/gdp.xlsx"
     }
 }
