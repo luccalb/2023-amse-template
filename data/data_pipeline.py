@@ -4,9 +4,11 @@ among all newly registered vehicles in german states.
 """
 
 import json
-import requests
 import argparse
+import requests
 import pandas as pd
+from sqlalchemy.types import Integer, Text, String, Float
+
 
 CONFIG_FILE = "./pipeline_config.json"
 RAW_FILES_FOLDER = "./raw"
@@ -90,11 +92,26 @@ vr_df = pd.read_excel(vr_download_location,
 # remove the newline characters in state names
 vr_df.columns = vr_df.columns.str.replace('\n', ' ')
 vr_df = vr_df[['Elektro (BEV)', 'Hybrid', 'Insgesamt']]
-vr_df['anteil_elektro'] = (vr_df['Elektro (BEV)'] + vr_df['Hybrid']) / vr_df['Insgesamt']
+vr_df['share_electric'] = (vr_df['Elektro (BEV)'] + vr_df['Hybrid']) / vr_df['Insgesamt']
 vr_df = vr_df.dropna()
 
 vr_df['gdp_per_capita'] = gdp_df
 print(vr_df.index)
 
-# save to local sqlite instance
-vr_df.to_sql('evs_per_capita', 'sqlite:///clean/evs_per_capita.sqlite', if_exists='replace', index=True)
+# 3.3 Rename the columns
+vr_df = vr_df.rename({
+    'Elektro (BEV)': 'electric_total',
+    'Hybrid': 'hybrid_total',
+    'Insgesamt': 'total'
+}, axis='columns')
+
+vr_df.index = vr_df.index.rename('federal_state')
+
+# Step 4 - save to local sqlite instance
+vr_df.to_sql('evs_per_capita',
+             'sqlite:///clean/evs_per_capita.sqlite',
+             if_exists='replace',
+             index=True,
+             dtype={
+    
+})
