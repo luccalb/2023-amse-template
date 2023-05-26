@@ -7,7 +7,7 @@ import json
 import argparse
 import requests
 import pandas as pd
-from sqlalchemy.types import Integer, Text, String, Float
+from sqlalchemy.types import Integer, Text, Float
 
 
 CONFIG_FILE = "./pipeline_config.json"
@@ -89,10 +89,17 @@ vr_df = pd.read_excel(vr_download_location,
                       skiprows=7,
                       nrows=17,
                       index_col=0)
+
 # remove the newline characters in state names
 vr_df.columns = vr_df.columns.str.replace('\n', ' ')
 vr_df = vr_df[['Elektro (BEV)', 'Hybrid', 'Insgesamt']]
+
+# calculate the share of electric vehicles among all new registrations
 vr_df['share_electric'] = (vr_df['Elektro (BEV)'] + vr_df['Hybrid']) / vr_df['Insgesamt']
+# round percentages to 4 decimal points
+vr_df['share_electric'] = vr_df['share_electric'].round(4)
+
+# clean data, remove any NA cells
 vr_df = vr_df.dropna()
 
 vr_df['gdp_per_capita'] = gdp_df
@@ -113,5 +120,10 @@ vr_df.to_sql('evs_per_capita',
              if_exists='replace',
              index=True,
              dtype={
-    
+    'federal_state': Text,
+    'total': Integer,
+    'electric_total': Integer,
+    'hybrid_total': Integer,
+    'share_electric': Float,
+    'gdp_per_capita': Integer
 })
