@@ -18,8 +18,6 @@ RAW_FILES_FOLDER = os.path.join(abs_path, "raw")
 CLEANED_FILES_FOLDER = os.path.join(abs_path, "clean")
 HTTP_TIMEOUT = 10000
 
-print(CLEANED_FILES_FOLDER)
-
 def save_url(url, out):
     '''Takes a url and saves the contents to out'''
     file_stream = requests.get(url, timeout=HTTP_TIMEOUT, allow_redirects=True)
