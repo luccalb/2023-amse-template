@@ -1,4 +1,5 @@
-/data/raw/
+/data/raw
 /data/clean
 *.xlsx
 *.sqlite
+data/__pycache__

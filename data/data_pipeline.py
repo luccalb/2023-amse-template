@@ -87,7 +87,7 @@ if __name__ == '__main__':
     # find the correct row for the current year
     gdp_df = gdp_df[gdp_df['Jahr'] == 2022].iloc[0]
 
-    print(gdp_df.head())
+    # print(gdp_df.head())
 
     # 3.2 Load and save vehicle data
 
@@ -111,7 +111,7 @@ if __name__ == '__main__':
     vr_df = vr_df.dropna()
 
     vr_df['gdp_per_capita'] = gdp_df
-    print(vr_df.index)
+    # print(vr_df.index)
 
     # 3.3 Rename the columns
     vr_df = vr_df.rename({

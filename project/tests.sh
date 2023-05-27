@@ -5,12 +5,12 @@ EXPECTED_OUT_FILE="./$MY_PATH/../data/clean/evs_per_capita.sqlite"
 # [STEP 1]
 # activate the virtual environment with all dependencies
 source "$MY_PATH/../../.venv/Scripts/activate"
-echo 'Activated AMSE virtual environment'
-python --version
+echo '[STATUS] Activated AMSE virtual environment'
+# python --version
 
 # [STEP 2]
 # clean the environment, removing all old files
-echo 'Cleaning the test environment..'
+echo '[STATUS] Cleaning the test environment..'
 
 rm -f ./$MY_PATH/../data/clean/*.sqlite
 rm -f ./$MY_PATH/../data/raw/*.xlsx
