@@ -105,7 +105,7 @@ if __name__ == '__main__':
     # calculate the share of electric vehicles among all new registrations
     vr_df['share_electric'] = (vr_df['Elektro (BEV)'] + vr_df['Hybrid']) / vr_df['Insgesamt']
     # round percentages to 4 decimal points
-    # vr_df['share_electric'] = vr_df['share_electric'].round(4)
+    vr_df['share_electric'] = vr_df['share_electric'].astype(float).round(4)
 
     # clean data, remove any NA cells
     vr_df = vr_df.dropna()
