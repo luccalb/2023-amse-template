@@ -10,8 +10,6 @@ This projects analyzes if there is a correlation between the gross domestic prod
 <!-- Outline the impact of the analysis, e.g. which pains it solves. -->
 The analysis helps interested citizens and researchers to test ~~the claim that per capita CO2 emissions rise with income~~ if the relatively high cost of electric vehicles favors a more rapid transition towards EVs in wealthier german states. It is limited to the domain of privately owned vehicles ~~and their emissions~~.
 
-## 
-
 ## Datasources
 
 <!-- Describe each datasources you plan to use in a section. Use the prefic "DatasourceX" where X is the id of the datasource. -->

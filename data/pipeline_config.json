@@ -1,10 +1,13 @@
 {
+    "metadata_urls": {
+        "vehicle_registrations": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz8/fz8_gentab.html"
+    },
     "dataset_urls": {
-        "vehicle_registrations": "https://www.kba.de/SharedDocs/Downloads/DE/Statistik/Fahrzeuge/FZ8/fz8_202304.xlsx?__blob=publicationFile",
+        "vehicle_registrations": "https://www.kba.de/SharedDocs/Downloads/DE/Statistik/Fahrzeuge/FZ8/",
         "gdp_per_capita": "https://www.statistikportal.de/sites/default/files/2023-03/vgrdl_r1b1_bs2022_1.xlsx"
     },
     "download_locations": {
-        "vehicle_registrations": "raw/vr.xlsx",
+        "vehicle_registrations": "raw/vr/",
         "gdp_per_capita": "raw/gdp.xlsx"
     }
 }

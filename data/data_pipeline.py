@@ -6,7 +6,7 @@ among all newly registered vehicles in german states.
 import os
 import json
 import argparse
-import requests
+from data_extractor import DataExtractor
 import pandas as pd
 from sqlalchemy.types import Integer, Text, Float
 
@@ -16,12 +16,16 @@ abs_path = os.path.dirname(__file__)
 CONFIG_FILE = os.path.join(abs_path, "pipeline_config.json")
 RAW_FILES_FOLDER = os.path.join(abs_path, "raw")
 CLEANED_FILES_FOLDER = os.path.join(abs_path, "clean")
-HTTP_TIMEOUT = 10000
 
-def save_url(url, out):
-    '''Takes a url and saves the contents to out'''
-    file_stream = requests.get(url, timeout=HTTP_TIMEOUT, allow_redirects=True)
-    open(out, 'wb').write(file_stream.content)
+def save_to_db(df, table, dtypes=None):
+    """Loads a pandas df into the main SQLite DB"""
+    # make sure the target folder exists
+    os.makedirs(CLEANED_FILES_FOLDER, exist_ok=True)
+    df.to_sql(table,
+                'sqlite:///' + CLEANED_FILES_FOLDER + '/evs_per_capita.sqlite',
+                if_exists='replace',
+                index=True,
+                dtype=dtypes)
 
 if __name__ == '__main__':
 
@@ -32,7 +36,7 @@ if __name__ == '__main__':
 
     arg_parser = argparse.ArgumentParser()
 
-    # while developing, it's not necessary to reload the files every time
+    # while developing, it's not necessary to reload the files every time -> default to false
     arg_parser.add_argument('-r', '--refresh',
                             action='store_true',
                             help='force re-downloading the datasets')
@@ -41,35 +45,22 @@ if __name__ == '__main__':
 
 
     #
-    # Step 1 - Check new file availability
+    # Step 1 (Extraction) - Download all relevant raw datasets
     #
 
-    # TODO
-
-    #
-    # Step 2 - Download all relevant raw datasets
-    #
+    data_extractor = DataExtractor(config)
+    data_extractor.download_all(args.refresh)
 
     vr_download_location = os.path.join(
         abs_path, config['download_locations']['vehicle_registrations'])
     gdp_download_location = os.path.join(abs_path, config['download_locations']['gdp_per_capita'])
 
-    if args.refresh or not os.path.isfile(vr_download_location):
-        # download the dataset for new vehicle registrations
-        vr_url = config['dataset_urls']['vehicle_registrations']
-        save_url(vr_url, vr_download_location)
-
-    if args.refresh or not os.path.isfile(gdp_download_location):
-
-        # downlaod the dataset for gdp per capita
-        gdp_url = config['dataset_urls']['gdp_per_capita']
-        save_url(gdp_url, gdp_download_location)
 
     #
-    # Step 3 - Find relevant data in files and save to sqlite DB
+    # Step 2 (Transformation) - Find relevant data in files and transform to our wish
     #
 
-    # 3.1 Load and save GDP data
+    # 2.1 Load and transform GDP data
 
     # find the sheet named '3.3' which contains the data we are interested in
     # (gdp per capita grouped by state)
@@ -82,56 +73,83 @@ if __name__ == '__main__':
     gdp_df.columns = gdp_df.columns.str.replace('Branden-burg', 'Brandenburg')
     gdp_df.columns = gdp_df.columns.str.replace('Nieder-sachsen', 'Niedersachsen')
 
-
-
     # find the correct row for the current year
     gdp_df = gdp_df[gdp_df['Jahr'] == 2022].iloc[0]
 
     # print(gdp_df.head())
 
-    # 3.2 Load and save vehicle data
+    # 2.2 Load and transform vehicle data
+    vr_joined_df = None
 
-    vr_df = pd.read_excel(vr_download_location,
-                        sheet_name='FZ 8.6',
-                        usecols='B:Q',
-                        skiprows=7,
-                        nrows=17,
-                        index_col=0)
+    vr_files = os.listdir(os.path.dirname(vr_download_location))
 
-    # remove the newline characters in state names
-    vr_df.columns = vr_df.columns.str.replace('\n', ' ')
-    vr_df = vr_df[['Elektro (BEV)', 'Hybrid', 'Insgesamt']]
+    for vr_file in vr_files:
+        vr_df = pd.read_excel(os.path.join(vr_download_location, vr_file),
+                            sheet_name='FZ 8.6',
+                            usecols='B:Q',
+                            skiprows=7,
+                            nrows=17,
+                            index_col=0)
 
-    # calculate the share of electric vehicles among all new registrations
-    vr_df['share_electric'] = (vr_df['Elektro (BEV)'] + vr_df['Hybrid']) / vr_df['Insgesamt']
+        # remove the newline characters in state names
+        vr_df.columns = vr_df.columns.str.replace('\n', ' ')
+        vr_df = vr_df[['Elektro (BEV)', 'Hybrid', 'Insgesamt']]
+
+        # calculate the share of electric vehicles among all new registrations (can be used later for time series)
+        vr_df['share_electric'] = (vr_df['Elektro (BEV)'] + vr_df['Hybrid']) / vr_df['Insgesamt']
+        # round percentages to 4 decimal points
+        vr_df['share_electric'] = vr_df['share_electric'].astype(float).round(4)
+
+        # clean data, remove any NA cells
+        vr_df = vr_df.dropna()
+
+        # 2.3 Rename the columns
+        vr_df = vr_df.rename({
+            'Elektro (BEV)': 'electric_total',
+            'Hybrid': 'hybrid_total',
+            'Insgesamt': 'total'
+        }, axis='columns')
+
+        vr_df.index = vr_df.index.rename('federal_state')
+
+        # add year and month column
+        filename_parts = vr_file.split('_')
+        year = filename_parts[1]
+        month = filename_parts[2].split('.')[0]
+        
+        vr_df['year'] = year
+        vr_df['month'] = month
+        
+        # add the resulting (monthly) dataframe to the aggregated dataframe
+        if vr_joined_df is None:
+            vr_joined_df = vr_df
+        else:
+            vr_joined_df = pd.concat([vr_joined_df, vr_df])
+
+    # save the joined monthly data in a seperate sqlite table before aggregating the data
+    save_to_db(vr_joined_df, f"vr_{year}")
+    
+    # 2.4 Group and aggregate the data monthly by federal state
+    aggregated_df = vr_joined_df.groupby('federal_state').aggregate({'electric_total': 'sum', 'total': 'sum', 'hybrid_total': 'sum'})
+    
+    # calculate the share of electric vehicles again, this time on aggregated data
+    aggregated_df['share_electric'] = (aggregated_df['electric_total'] + aggregated_df['hybrid_total']) / aggregated_df['total']
     # round percentages to 4 decimal points
-    vr_df['share_electric'] = vr_df['share_electric'].astype(float).round(4)
+    aggregated_df['share_electric'] = aggregated_df['share_electric'].astype(float).round(4)
+    
+    # add gdp data
+    aggregated_df['gdp_per_capita'] = gdp_df
 
-    # clean data, remove any NA cells
-    vr_df = vr_df.dropna()
-
-    vr_df['gdp_per_capita'] = gdp_df
     # print(vr_df.index)
 
-    # 3.3 Rename the columns
-    vr_df = vr_df.rename({
-        'Elektro (BEV)': 'electric_total',
-        'Hybrid': 'hybrid_total',
-        'Insgesamt': 'total'
-    }, axis='columns')
-
-    vr_df.index = vr_df.index.rename('federal_state')
-
-    # Step 4 - save to local sqlite instance
-    vr_df.to_sql('evs_per_capita',
-                'sqlite:///' + CLEANED_FILES_FOLDER + '/evs_per_capita.sqlite',
-                if_exists='replace',
-                index=True,
-                dtype={
+    # Step 3 (Loading) - Save to local sqlite instance
+    dtypes = {
         'federal_state': Text,
         'total': Integer,
         'electric_total': Integer,
         'hybrid_total': Integer,
         'share_electric': Float,
         'gdp_per_capita': Integer
-    })
+    }
+
+    save_to_db(aggregated_df, 'evs_per_capita', dtypes)
