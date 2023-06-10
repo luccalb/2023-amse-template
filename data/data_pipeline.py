@@ -7,10 +7,13 @@ import os
 import json
 import argparse
 from data_extractor import DataExtractor
+from logger import ETLogger
 import pandas as pd
 from sqlalchemy.types import Integer, Text, Float
 
 abs_path = os.path.dirname(__file__)
+
+LOGGER = ETLogger("PIPELINE")
 
 
 CONFIG_FILE = os.path.join(abs_path, "pipeline_config.json")
@@ -28,6 +31,9 @@ def save_to_db(df, table, dtypes=None):
                 dtype=dtypes)
 
 if __name__ == '__main__':
+    
+    LOGGER.log("Starting ETL Pipleine.")
+    
 
     with open(CONFIG_FILE, encoding='UTF-8') as config_json:
         config = json.load(config_json)
@@ -42,6 +48,8 @@ if __name__ == '__main__':
                             help='force re-downloading the datasets')
 
     args = arg_parser.parse_args()
+    
+    LOGGER.log(f"Force reload: {args.refresh}")
 
 
     #
@@ -49,6 +57,7 @@ if __name__ == '__main__':
     #
 
     data_extractor = DataExtractor(config)
+    LOGGER.log("Starting extraction stage")
     data_extractor.download_all(args.refresh)
 
     vr_download_location = os.path.join(
@@ -56,6 +65,7 @@ if __name__ == '__main__':
     gdp_download_location = os.path.join(abs_path, config['download_locations']['gdp_per_capita'])
 
 
+    LOGGER.log("Entering 'Transform' stage.")
     #
     # Step 2 (Transformation) - Find relevant data in files and transform to our wish
     #
@@ -84,12 +94,19 @@ if __name__ == '__main__':
     vr_files = os.listdir(os.path.dirname(vr_download_location))
 
     for vr_file in vr_files:
+        
+        filename_parts = vr_file.split('_')
+        year = filename_parts[1]
+        month = filename_parts[2].split('.')[0]
+        
         vr_df = pd.read_excel(os.path.join(vr_download_location, vr_file),
                             sheet_name='FZ 8.6',
                             usecols='B:Q',
                             skiprows=7,
                             nrows=17,
                             index_col=0)
+        
+        LOGGER.log(f"Processing VR dataset for month {month}")
 
         # remove the newline characters in state names
         vr_df.columns = vr_df.columns.str.replace('\n', ' ')
@@ -113,9 +130,6 @@ if __name__ == '__main__':
         vr_df.index = vr_df.index.rename('federal_state')
 
         # add year and month column
-        filename_parts = vr_file.split('_')
-        year = filename_parts[1]
-        month = filename_parts[2].split('.')[0]
         
         vr_df['year'] = year
         vr_df['month'] = month
@@ -130,9 +144,11 @@ if __name__ == '__main__':
     save_to_db(vr_joined_df, f"vr_{year}")
     
     # 2.4 Group and aggregate the data monthly by federal state
+    LOGGER.log("Aggregating all monthly VR datasets.")
     aggregated_df = vr_joined_df.groupby('federal_state').aggregate({'electric_total': 'sum', 'total': 'sum', 'hybrid_total': 'sum'})
     
     # calculate the share of electric vehicles again, this time on aggregated data
+    LOGGER.log("Calculating share of EV registrations in observed timespan.")
     aggregated_df['share_electric'] = (aggregated_df['electric_total'] + aggregated_df['hybrid_total']) / aggregated_df['total']
     # round percentages to 4 decimal points
     aggregated_df['share_electric'] = aggregated_df['share_electric'].astype(float).round(4)
@@ -141,6 +157,8 @@ if __name__ == '__main__':
     aggregated_df['gdp_per_capita'] = gdp_df
 
     # print(vr_df.index)
+    
+    LOGGER.log("Entering 'Load' stage.")
 
     # Step 3 (Loading) - Save to local sqlite instance
     dtypes = {
@@ -153,3 +171,5 @@ if __name__ == '__main__':
     }
 
     save_to_db(aggregated_df, 'evs_per_capita', dtypes)
+    
+    LOGGER.log("Sucessfully saved clean & aggregated data!")

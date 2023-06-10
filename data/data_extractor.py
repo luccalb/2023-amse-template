@@ -7,10 +7,13 @@ import os
 import json
 from datetime import datetime
 import requests
+from logger import ETLogger
 
 ABS_PATH = os.path.dirname(__file__)
 CONFIG_FILE = os.path.join(ABS_PATH, "pipeline_config.json")
 HTTP_TIMEOUT = 10000
+
+LOGGER = ETLogger("EXTRACTOR")
 
 
 class DataExtractor:
@@ -33,8 +36,14 @@ class DataExtractor:
         "Downloads the dataset containing GDP per capita for german federal states."
         out_file = os.path.join(ABS_PATH, self.config['download_locations']['gdp_per_capita'])
         gdp_url = self.config['dataset_urls']['gdp_per_capita']
+        
+        found_file = os.path.isfile(out_file)
+        
+        if found_file:
+            LOGGER.log(f"Found GDP dataset at '{out_file}'.")
 
-        if force_refresh or not os.path.isfile(out_file):
+        if force_refresh or not found_file:
+            LOGGER.log("Downloading GDP dataset.")
             self.save_url(gdp_url, out_file)
 
 
@@ -78,7 +87,9 @@ class DataExtractor:
             first_month = 1
 
         if last_month == 0:
+            LOGGER.log("No last_month was given. Finding the most recent report..")
             last_month = self.get_recent_vr_month(year, "")
+            LOGGER.log(f"Last report was published in month: {last_month}")
 
         out_dir = os.path.join(ABS_PATH, self.config["download_locations"]["vehicle_registrations"])
 
@@ -87,7 +98,11 @@ class DataExtractor:
 
         for month in range(first_month, last_month+1):
             out_file = out_dir + f"vr_{year}_{month}.xlsx"
-            if force_refresh or not os.path.isfile(out_file):
+            found_file = os.path.isfile(out_file)
+            if found_file:
+                LOGGER.log(f"Found VR dataset for month {month} at '{out_file}'.")
+            if force_refresh or not found_file:
+                LOGGER.log(f"Downloading VR dataset for month {month}.")
                 self.get_vr_month(out_dir, year, month)
 
     def get_vr_month(self, out_dir, year, month):
