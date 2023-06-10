@@ -28,6 +28,7 @@ jobs:
           run: |
             ./main/project/tests.sh
         
-        - name: Run Data Pipeline
-          run: |
-            python ./main/data/data_pipeline.py
+        # comment pipeline step, because it is executed during testing
+        #- name: Run Data Pipeline
+        #  run: |
+        #    python ./main/data/data_pipeline.py
