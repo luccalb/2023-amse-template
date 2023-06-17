@@ -37,6 +37,8 @@ df = df.astype({'date': 'str',
 
 # validate CIN numbers
 df = df[df['CIN'].str.match(r"[0-9]{4,5}")]
+# pad with leading zeros
+df['CIN'] = df['CIN'].str.zfill(5)
 
 
 
@@ -56,4 +58,4 @@ df.to_sql("cars","sqlite://" + SQL_PATH, if_exists='replace', dtype={
     "electro": Integer,
     "hybrid": Integer,
     "plugInHybrid": Integer,
-    "others": Integer})
+    "others": Integer}, index=False)
