@@ -8,7 +8,9 @@ SQL_PATH = "/cars.sqlite"
 
 df = pd.read_csv(DATA_URL, delimiter=';', encoding='latin1', skiprows=6, skipfooter=4, engine='python')
 
+# select only requested columns
 df = df.iloc[:, [0,1,2,12,22,32,42,52,62,72]]
+# rename coulmns as requested
 df.columns = ['date', 'CIN', 'name', 'petrol', 'diesel', 'gas', 'electro', 'hybrid', 'plugInHybrid', 'others']
 
 # drop empty cells
