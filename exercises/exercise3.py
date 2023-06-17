@@ -24,7 +24,7 @@ df = df[df['CIN'].str.match(r"[0-9]{4,5}")]
 print(df.info())
 
 # save data to sqlite db, setting the correct types
-df.to_sql("carrs","sqlite://" + SQL_PATH, if_exists='replace', dtype={
+df.to_sql("cars","sqlite://" + SQL_PATH, if_exists='replace', dtype={
     "date": Text,
     "CIN": String(5),
     "name": Text,
