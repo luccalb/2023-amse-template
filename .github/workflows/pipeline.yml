@@ -29,6 +29,10 @@ jobs:
         - name: Run Integration- and Unit-Tests
           run: |
             ./main/project/tests.sh
+          
+        - name: Creating report
+          run: |
+            jupyter nbconvert --execute --to html report.ipynb --output index
         
         # comment pipeline step, because it is executed during testing
         #- name: Run Data Pipeline

@@ -6,3 +6,4 @@ sqlalchemy
 openpyxl
 plotly
 statsmodels
+nbconvert
