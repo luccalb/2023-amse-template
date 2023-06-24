@@ -3,9 +3,9 @@
 ## Overview
 
 - The project report can be found either as
-	- [Notebook](./report.ipynb) (Visualization not working in GitHub)
+	- [Notebook](./project/report.ipynb) (Visualization not working in GitHub)
 	- [Github Pages](https://luccalb.github.io/2023-amse-template/) (prefrerred)
-- The data exploration is performed in [Data Exploration Notebook](./exploration.ipynb)
+- The data exploration is performed in [Data Exploration Notebook](./project/exploration.ipynb)
 - The initial project plan can be found at [/project/project-plan.md](./project/project-plan.md)
 
 ## Introduction
