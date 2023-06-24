@@ -38,7 +38,7 @@ jobs:
             jupyter nbconvert --execute --to html ./main/project/report.ipynb --output index --output-dir ./main
         
         - name: Commit updated report
-          uses: actions/stefanzweifel/git-auto-commit-action@v4
+          uses: stefanzweifel/git-auto-commit-action@v4
           with:
             file_pattern: 'index.html'
         # comment pipeline step, because it is executed during testing
