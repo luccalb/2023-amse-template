@@ -32,7 +32,7 @@ jobs:
           
         - name: Creating report
           run: |
-            jupyter nbconvert --execute --to html ./main/report.ipynb --output index --output-dir ./main
+            jupyter nbconvert --execute --to html ./main/project/report.ipynb --output index --output-dir ./main
         
         # comment pipeline step, because it is executed during testing
         #- name: Run Data Pipeline
