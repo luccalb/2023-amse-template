@@ -10,6 +10,9 @@ on:
 jobs:
     run-pipeline:
         runs-on: ubuntu-latest
+        permissions:
+          # necessary for commiting the updated report
+          contents: write
         steps:
         - name: Checkout
           uses: actions/checkout@v3
@@ -34,6 +37,10 @@ jobs:
           run: |
             jupyter nbconvert --execute --to html ./main/project/report.ipynb --output index --output-dir ./main
         
+        - name: Commit updated report
+          uses: actions/stefanzweifel/git-auto-commit-action@v4
+          with:
+            file_pattern: 'index.html'
         # comment pipeline step, because it is executed during testing
         #- name: Run Data Pipeline
         #  run: |
