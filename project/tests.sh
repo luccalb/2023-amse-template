@@ -4,9 +4,10 @@ EXPECTED_OUT_FILE="./$MY_PATH/../data/clean/evs_per_capita.sqlite"
 
 # [STEP 1]
 # activate the virtual environment with all dependencies
-source "$MY_PATH/../../.venv/Scripts/activate"
-echo '[STATUS] Activated AMSE virtual environment'
-# python --version
+if ! [ "$CI" = "true" ]; then
+    source "$MY_PATH/../../.venv/Scripts/activate"
+    echo '[STATUS] Activated AMSE virtual environment'
+fi
 
 # [STEP 2]
 # clean the environment, removing all old files
