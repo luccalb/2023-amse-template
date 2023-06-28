@@ -35,7 +35,7 @@ jobs:
           
         - name: Creating report
           run: |
-            jupyter nbconvert --execute --to html ./main/project/report.ipynb --output index --output-dir ./main
+            jupyter nbconvert --execute --to html ./main/project/report_notebook.ipynb --output index --output-dir ./main
         
         - name: Commit updated report
           uses: stefanzweifel/git-auto-commit-action@v4
