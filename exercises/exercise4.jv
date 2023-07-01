@@ -62,6 +62,7 @@ pipeline BatteryPipeline {
         -> BatteryTextFileInterpreter
         -> BatteryCSVInterpreter
         -> BatteryColumnSelector
+        -> BatteryColumnDeleter
         -> BatteryTableInterpreter
         -> TemperatureTransformer
         -> BatteryTemperatureTransformer
