@@ -5,6 +5,23 @@ transform CelsiusToFahrenheit{
   tempFahrenheit: (tempCelsius*9/5)+32;
 }
 
+constraint MonthConstraint oftype RangeConstraint {
+    lowerBound: 1;
+    upperBound: 12;
+}
+ 
+valuetype Month oftype integer {
+    constraints: [MonthConstraint];
+}
+
+constraint GermanBoolConstraint oftype AllowlistConstraint {
+    allowlist: ["Ja", "Nein"];
+}
+
+valuetype GermanBoolean oftype text {
+    constraints: [GermanBoolConstraint];
+}
+
 pipeline BatteryPipeline {
     block DataExtractor oftype HttpExtractor {
         url: "https://www.mowesta.com/data/measure/mowesta-dataset-20221107.zip";
@@ -35,10 +52,10 @@ pipeline BatteryPipeline {
             "Geraet" oftype integer,
             "Hersteller" oftype text,
             "Model" oftype text,
-            "Monat" oftype integer,
+            "Monat" oftype Month,
             "Temperatur" oftype decimal,
             "Batterietemperatur" oftype decimal,
-            "Geraet aktiv" oftype text,
+            "Geraet aktiv" oftype GermanBoolean,
         ];
     }
 
