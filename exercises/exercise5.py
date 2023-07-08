@@ -10,6 +10,7 @@ DATA_URL = "https://gtfs.rhoenenergie-bus.de/GTFS.zip"
 DATA_FILE_NAME = "stops.txt"
 COLUMNS = ["stop_id", "stop_name", "stop_lat", "stop_lon", "zone_id"]
 UMLAUTE = ["ä", "ü", "ö"]
+STOP_ZONE = 2001
 SQL_PATH = "/gtfs.sqlite"
 ABS_PATH = os.path.dirname(__file__)
 
@@ -31,13 +32,17 @@ stops_df = stops_df[COLUMNS]
 
 # cleaning
 # 1) only keep columns where stop_name contains an umlaut
-stops_df = stops_df[stops_df["stop_name"].str.contains("|".join(UMLAUTE), regex=True, flags=re.IGNORECASE)]
+#stops_df = stops_df[stops_df["stop_name"].str.contains("|".join(UMLAUTE), regex=True, flags=re.IGNORECASE)]
 
 # 2) validate lat/long range
 stops_df = stops_df[stops_df["stop_lat"] <= 90]
 stops_df = stops_df[stops_df["stop_lat"] >= -90]
 stops_df = stops_df[stops_df["stop_lon"] <= 90]
 stops_df = stops_df[stops_df["stop_lon"] >= -90]
+
+# 3) only keep stops from zone 2001
+
+stops_df = stops_df[stops_df["zone_id"] == STOP_ZONE]
 
 
 
