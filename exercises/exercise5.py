@@ -11,13 +11,16 @@ COLUMNS = ["stop_id", "stop_name", "stop_lat", "stop_lon", "zone_id"]
 UMLAUTE = ["ä", "ü", "ö"]
 SQL_PATH = "/gtfs.sqlite"
 
-
+# download zipfile to temp folder using urlretrieve
 filehandle, _ = urllib.request.urlretrieve(DATA_URL, "./tmp/GTFS.zip")
 
+# create a zipefile object
 zip_obj = zipfile.ZipFile(filehandle, "r")
 
+# file handle for the file containing our data
 stops_file = zip_obj.open(DATA_FILE_NAME)
 
+# read file as csv
 stops_df = pd.read_csv(stops_file)
 
 # whitelist columns
