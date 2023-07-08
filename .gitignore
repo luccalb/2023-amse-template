@@ -3,3 +3,4 @@
 *.xlsx
 *.sqlite
 data/__pycache__
+*.zip
