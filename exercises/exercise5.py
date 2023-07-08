@@ -1,3 +1,4 @@
+import os
 import urllib.request
 import zipfile
 import re
@@ -10,9 +11,11 @@ DATA_FILE_NAME = "stops.txt"
 COLUMNS = ["stop_id", "stop_name", "stop_lat", "stop_lon", "zone_id"]
 UMLAUTE = ["ä", "ü", "ö"]
 SQL_PATH = "/gtfs.sqlite"
+ABS_PATH = os.path.dirname(__file__)
+
 
 # download zipfile to temp folder using urlretrieve
-filehandle, _ = urllib.request.urlretrieve(DATA_URL, "./tmp/GTFS.zip")
+filehandle, _ = urllib.request.urlretrieve(DATA_URL, os.path.join(ABS_PATH, "tmp/GTFS.zip"))
 
 # create a zipefile object
 zip_obj = zipfile.ZipFile(filehandle, "r")
